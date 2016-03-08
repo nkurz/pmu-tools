@@ -86,12 +86,14 @@ def download(match, key=["core"], link=True):
         getfile(modelpath, dir, "mapfile.csv")
         models = open(os.path.join(dir, "mapfile.csv"))
         for j in models:
+            if not j.strip():
+                continue # skip empty lines
             n = j.rstrip().split(",")
             if len(n) < 4:
-                if len(n) > 0:
-                    print "Cannot parse", n
+                print "Cannot parse", n
                 continue
             cpu, version, name, type = n
+            print "Line", n
             if not fnmatch(cpu, match) or (key is not None and type not in key) or type.startswith("EventType"):
                 continue
             cpu = sanitize(cpu, allowed_chars)
@@ -130,9 +132,9 @@ def download(match, key=["core"], link=True):
     return found
 
 def download_current(link=False):
-    """Download JSON event list for current cpu.
+    """Download all matching JSON event lists for current cpu.
        Returns >0 when a event list is found"""
-    return download(get_cpustr(), link=link)
+    return download(get_cpustr(), link=link, key=None)
 
 def eventlist_name(name=None, key="core"):
     if not name:
@@ -165,11 +167,11 @@ if __name__ == '__main__':
     else:
         found = 0
         for j in args.cpus:
-            found += download(j, link=args.link)
+            found += download(j, link=args.link, key=None)
 
     if found == 0:
         print >>sys.stderr, "Nothing found"
 
     el = eventlist_name()
     if os.path.exists(el):
-        print "my event list", el
+        print "Using core event list", el
