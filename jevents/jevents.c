@@ -211,7 +211,8 @@ static struct msrmap *lookup_msr(char *map, jsmntok_t *val)
 	for (i = 0; msrmap[i].num; i++)
 		if (json_streq(map, &newval, msrmap[i].num))
 			return &msrmap[i];
-	if (!warned) {
+	if (!warned && strncmp(map + val->start, "0x3F7", 5)) {
+		/* no warning for Skylake PEBS Frontend MSR */
 		warned = true;
 		fprintf(stderr, "Unknown MSR in event file %.*s\n",
 			json_len(val), map + val->start);
